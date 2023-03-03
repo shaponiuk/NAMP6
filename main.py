@@ -67,11 +67,13 @@ data_len = in_data.shape[0]
 
 def sample_batch(batch_size, lookback, pred_samples):
     idx = torch.randint(lookback, data_len, (batch_size, 1,), device=DEVICE)
-    idx = [idx - i for i in range(lookback)]
-    idx = torch.cat(idx, dim=1).flip(1)
+    idx = idx.repeat(1, lookback)
+    idx_diff = torch.arange(lookback, device=DEVICE)
+    idx = idx - idx_diff
+    idx = idx.flip(1)
     in_idx = idx
     out_idx = idx[:, -pred_samples:]
-    batch = (in_data[in_idx], out_data[out_idx])
+    batch = (in_data[in_idx].to(DEVICE), out_data[out_idx].to(DEVICE))
     return batch
 
 # module = models.MLPModel(lookback=LOOKBACK, depth=2, hidden_dim=HIDDEN_WIDTH, pred_samples=PRED_SAMPLES, activation=torch.tanh).to(DEVICE)
@@ -84,7 +86,7 @@ elif MODEL == "TCN":
 elif MODEL == "LSTM":
     module = models.LSTM(SAMPLES_AT_ONCE, HIDDEN_WIDTH, MLP_DEPTH, out_samples=PRED_SAMPLES)
 
-model = models.NAMPModel(module)
+model = models.NAMPModel(module).to(DEVICE)
 
 module_name = module.__class__.__name__
 if module_name == "RNNWrapper":
@@ -110,11 +112,15 @@ for epoch in range(1000000):
     maes = []
     norm_maes = []
     highest_error = 0
+    sampling_time = 0
+    t1 = time()
     print()
     for i in range(EPOCH_LEN):
         print(f"iteration {i+1}/{EPOCH_LEN}", end='\r')
         optim.zero_grad()
+        ts1 = time()
         x, y = sample_batch(batch_size=BATCH_SIZE, lookback=LOOKBACK, pred_samples=PRED_SAMPLES)
+        sampling_time += time() - ts1
         out = model(x) 
         loss =\
             losses.mse(out, y)\
@@ -142,3 +148,5 @@ for epoch in range(1000000):
     print("epoch mse:", sum(mses) / EPOCH_LEN)
     print("epoch mae:", sum(maes) / EPOCH_LEN)
     print("epoch highest error:", highest_error)
+    print("time sampling:", sampling_time)
+    print("total time:", t2 - t1)

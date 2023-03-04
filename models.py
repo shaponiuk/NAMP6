@@ -132,18 +132,22 @@ class LSTM(nn.Module):
 class TCN(nn.Module):
     def __init__(self, obs_dim, hidden_dim, depth, activation):
         super(TCN, self).__init__()
-        self.conv_in = nn.Conv1d(obs_dim, hidden_dim, 2, dilation=1)
-        self.convs_h = nn.ModuleList([nn.Conv1d(hidden_dim, hidden_dim, 2, dilation=2**i) for i in range(1, depth)])
+        self.conv_in = nn.Conv1d(obs_dim, hidden_dim * 2, 2, dilation=1)
+        self.convs_h = nn.ModuleList([nn.Conv1d(hidden_dim, hidden_dim * 2, 2, dilation=2**i) for i in range(1, depth)])
         self.conv_out = nn.Conv1d(hidden_dim, obs_dim, 2, dilation=2**depth)
         self.activation = activation
         self.obs_dim = obs_dim
+        self.hidden_dim = hidden_dim
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = x.view(x.shape[0], -1, self.obs_dim).permute(0, 2, 1)
-        x = self.activation(self.conv_in(x))
+        x = self.conv_in(x)
+        x = self.sigmoid(x[:, :self.hidden_dim]) * self.activation(x[:, self.hidden_dim:])
 
         for c in self.convs_h:
-            x = self.activation(c(x))
+            x = c(x)
+            x = self.sigmoid(x[:, :self.hidden_dim]) * self.activation(x[:, self.hidden_dim:])
 
         x = self.conv_out(x).permute(0, 2, 1)
         x = x.reshape(x.shape[0], -1)

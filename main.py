@@ -38,7 +38,7 @@ elif task == "jcm_b6":
     DELAY = 248
 
 EPOCH_LEN = 100
-LR = 0.000001 * 100
+LR = 0.000001 * 1000
 
 SAMPLES_AT_ONCE = 1
 MLP_DEPTH = 5

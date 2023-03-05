@@ -16,33 +16,88 @@ import losses
 task = "jcm_c6"
 # task = "jcm_b6"
 
+import torch
+from time import time
+import models
+import utils
+import dataloading
+import losses
+
+task = "bandmaster_n4"
+# task = "bandmaster_n6"
+# task = "bandmaster_n8"
+# task = "bandmaster_n10"
+# task = "bandmaster_b4"
+# task = "bandmaster_b6"
+# task = "bandmaster_b8"
+# task = "bandmaster_b10"
+# task = "jcm_c6"
+# task = "jcm_c10"
+# task = "jcm_b6"
+
+WZMAKI_DIR = "drive/MyDrive/wzmaki"
+
 if task == "bandmaster_n4":
-    IN_FILE = 'wzmaki/bandmaster_better/bandmaster audio_in.wav'
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
     FILE_NAME = 'bandmaster n_4.wav'
-    OUT_FILE = f'wzmaki/bandmaster_better/{FILE_NAME}'
+    OUT_FILE = f'{WZMAKI_DIR}/bandmaster_better/{FILE_NAME}'
+    DELAY = 248
+if task == "bandmaster_n6":
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
+    FILE_NAME = 'bandmaster n_6.wav'
+    OUT_FILE = f'{WZMAKI_DIR}/bandmaster_better/{FILE_NAME}'
+    DELAY = 248
+if task == "bandmaster_n8":
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
+    FILE_NAME = 'bandmaster n_8.wav'
+    OUT_FILE = f'{WZMAKI_DIR}/bandmaster_better/{FILE_NAME}'
+    DELAY = 248
+if task == "bandmaster_n10":
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
+    FILE_NAME = 'bandmaster n_10.wav'
+    OUT_FILE = f'{WZMAKI_DIR}/bandmaster_better/{FILE_NAME}'
     DELAY = 248
 elif task == "bandmaster_b4":
-    IN_FILE = 'wzmaki/bandmaster_better/bandmaster audio_in.wav'
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
     FILE_NAME = 'bandmaster n_4.wav'
-    OUT_FILE = f'wzmaki/bandmaster_better/{FILE_NAME}'
+    OUT_FILE = f'{WZMAKI_DIR}/bandmaster_better/{FILE_NAME}'
+    DELAY = 248
+if task == "bandmaster_b6":
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
+    FILE_NAME = 'bandmaster n_6.wav'
+    OUT_FILE = f'{WZMAKI_DIR}/bandmaster_better/{FILE_NAME}'
+    DELAY = 248
+if task == "bandmaster_b8":
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
+    FILE_NAME = 'bandmaster n_8.wav'
+    OUT_FILE = f'{WZMAKI_DIR}/bandmaster_better/{FILE_NAME}'
+    DELAY = 248
+if task == "bandmaster_b10":
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
+    FILE_NAME = 'bandmaster n_10.wav'
+    OUT_FILE = f'{WZMAKI_DIR}/bandmaster_better/{FILE_NAME}'
     DELAY = 248
 elif task == "jcm_c6":
-    IN_FILE = 'wzmaki/bandmaster_better/bandmaster audio_in.wav'
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
     FILE_NAME = 'testgit_jcm800_next clean gain 6.wav'
-    OUT_FILE = f'wzmaki/jcm_800_damian_2/{FILE_NAME}'
+    OUT_FILE = f'{WZMAKI_DIR}/jcm_800_damian_2/{FILE_NAME}'
+    DELAY = 248
+elif task == "jcm_c10":
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
+    FILE_NAME = 'testgit_jcm800_next clean gain 10.wav'
+    OUT_FILE = f'{WZMAKI_DIR}/jcm_800_damian_2/{FILE_NAME}'
     DELAY = 248
 elif task == "jcm_b6":
-    IN_FILE = 'wzmaki/bandmaster_better/bandmaster audio_in.wav'
+    IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
     FILE_NAME = 'testgit_jcm800_next boost gain 6.wav'
-    OUT_FILE = f'wzmaki/jcm_800_damian_2/{FILE_NAME}'
+    OUT_FILE = f'{WZMAKI_DIR}/jcm_800_damian_2/{FILE_NAME}'
     DELAY = 248
 
-EPOCH_LEN = 100
+EPOCH_LEN = 1000
 LR = 0.000001 * 1000
-
 SAMPLES_AT_ONCE = 1
-MLP_DEPTH = 5
-PRED_SAMPLES = 8192 // 16
+MLP_DEPTH = 1
+PRED_SAMPLES = 8192 // 1
 # MODEL = "RNN"
 MODEL = "TCN"
 # MODEL = "LSTM"
@@ -50,16 +105,16 @@ if MODEL == "RNN" or MODEL == "LSTM":
     LOOKBACK = PRED_SAMPLES * 2
 elif MODEL == "TCN":
     LOOKBACK = PRED_SAMPLES + (2 ** (MLP_DEPTH + 1) - 1) * SAMPLES_AT_ONCE
-HIDDEN_WIDTH = 8
+# HIDDEN_WIDTH = 8
 # HIDDEN_WIDTH = 90
 # HIDDEN_WIDTH = 64
 # HIDDEN_WIDTH = 256
-# HIDDEN_WIDTH = 16
+HIDDEN_WIDTH = 16
 BATCH_SIZE = 32
 
 AUDIO_START = 1000
 # DEVICE = torch.device('mps') if torch.backends.mps.is_available() else torch.device('cpu')
-DEVICE = torch.device('cpu')
+DEVICE = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
 in_data, out_data = dataloading.load_data(IN_FILE, OUT_FILE, DELAY, AUDIO_START, DEVICE)
 

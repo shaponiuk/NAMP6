@@ -6,29 +6,37 @@ class MLPModel(nn.Module):
         super(MLPModel, self).__init__()
 
         if depth >= 2:
-            self.ll_in = nn.Linear(lookback, hidden_dim)
-            self.ll_h = nn.ModuleList([nn.Linear(hidden_dim, hidden_dim) for _ in range(depth - 2)])
-            self.ll_out = nn.Linear(hidden_dim, pred_samples)
+            self.ll_in = nn.Linear(lookback, hidden_dim * 2)
+            self.ll_h = nn.ModuleList([nn.Linear(hidden_dim, hidden_dim * 2) for _ in range(depth - 2)])
+            self.ll_out = nn.Linear(hidden_dim, pred_samples * 2)
         else:
-            self.ll = nn.Linear(lookback, pred_samples)
+            self.ll = nn.Linear(lookback, pred_samples * 2)
 
+        self.hidden_dim = hidden_dim
         self.depth = depth
         self.activation = activation
         self.act_last = act_last
+        self.pred_samples = pred_samples
+
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         if self.depth >= 2:
-            x = self.activation(self.ll_in(x))
+            x = self.ll_in(x)
+            x = self.sigmoid(x[:, :self.hidden_dim]) * self.activation(x[:, self.hidden_dim:])
 
             for l in self.ll_h:
-                x = self.activation(l(x))
+                x = l(x)
+                x = self.sigmoid(x[:, :self.hidden_dim]) * self.activation(x[:, self.hidden_dim:])
 
             x = self.ll_out(x)
         else:
             x = self.ll(x)
 
         if self.act_last:
-            x = self.activation(x)
+            x = self.sigmoid(x[:, :x.shape[1] // 2]) * self.activation(x[:, x.shape[1] // 2 :])
+        else:
+            x = x[:, :x.shape[1] // 2]
 
         return x
 

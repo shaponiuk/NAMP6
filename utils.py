@@ -8,9 +8,9 @@ def count_params(model):
     n_params = sum([np.prod(p.size()) for p in model_parameters])
     return n_params
 
-def try_load_model(checkpoint_path, model, optim):
+def try_load_model(checkpoint_path, model, optim, device):
     try:
-        chpt = torch.load(checkpoint_path + "/chpt.pt")
+        chpt = torch.load(checkpoint_path + "/chpt.pt", map_location=device)
         model.load_state_dict(chpt["model"])
         # optim.load_state_dict(chpt["optim"])
         print("loaded model weights")

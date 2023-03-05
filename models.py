@@ -163,7 +163,23 @@ class TCN(nn.Module):
         return x
 
     def get_json_weights(self):
-        return {} # TODO
+        return {
+            "conv_in": {
+                "weight": self.conv_in.weight.tolist(),
+                "bias": self.conv_in.bias.tolist(),
+            },
+            "convs_h": [
+                {
+                    "weight": c.weight.tolist(),
+                    "bias": c.bias.tolist(),
+                }
+                for c in self.convs_h
+            ],
+            "conv_out": {
+                "weight": self.conv_out.weight.tolist(),
+                "bias": self.conv_out.bias.tolist(),
+            },
+        }
 
 class TCN_2(nn.Module):
     def __init__(self,):

@@ -23,7 +23,7 @@ import utils
 import dataloading
 import losses
 
-task = "bandmaster_n4"
+# task = "bandmaster_n4"
 # task = "bandmaster_n6"
 # task = "bandmaster_n8"
 # task = "bandmaster_n10"
@@ -31,11 +31,12 @@ task = "bandmaster_n4"
 # task = "bandmaster_b6"
 # task = "bandmaster_b8"
 # task = "bandmaster_b10"
-# task = "jcm_c6"
+task = "jcm_c6"
 # task = "jcm_c10"
 # task = "jcm_b6"
 
-WZMAKI_DIR = "drive/MyDrive/wzmaki"
+# WZMAKI_DIR = "drive/MyDrive/wzmaki"
+WZMAKI_DIR = "wzmaki"
 
 if task == "bandmaster_n4":
     IN_FILE = f'{WZMAKI_DIR}/bandmaster_better/bandmaster audio_in.wav'
@@ -93,10 +94,10 @@ elif task == "jcm_b6":
     OUT_FILE = f'{WZMAKI_DIR}/jcm_800_damian_2/{FILE_NAME}'
     DELAY = 248
 
-EPOCH_LEN = 1000
-LR = 0.000001 * 1000
+EPOCH_LEN = 10
+LR = 0.000001 * 1
 SAMPLES_AT_ONCE = 1
-MLP_DEPTH = 1
+MLP_DEPTH = 10
 PRED_SAMPLES = 8192 // 1
 # MODEL = "RNN"
 MODEL = "TCN"
@@ -156,7 +157,7 @@ else:
 checkpoint_name = f"./model_checkpoints/{model_name}"
 optim = torch.optim.Adam(lr=LR, params=model.parameters())
 
-utils.try_load_model(checkpoint_name, model, optim)
+utils.try_load_model(checkpoint_name, model, optim, device=DEVICE)
 
 print(f"the model has {utils.count_params(model)} parameters")
     
